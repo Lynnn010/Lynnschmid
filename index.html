@@ -240,6 +240,21 @@
   .wpanel { display: none; }
   .wpanel.is-active { display: block; animation: fade .3s ease both; }
 
+  /* VIDEO panel: sit vertically centred in the viewport */
+  :root[data-page="arbeiten"][data-cat="video"] #route-arbeiten .page {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: clamp(4.5rem, 3rem + 4vh, 5.5rem);
+    padding-bottom: clamp(4.5rem, 3rem + 4vh, 5.5rem);
+  }
+  @media (max-height: 640px) {
+    :root[data-page="arbeiten"][data-cat="video"] #route-arbeiten .page {
+      display: block;
+    }
+  }
+
   /* placeholder tiles — Lynn swaps these for real photos / stills */
   .ph {
     position: relative;
@@ -779,7 +794,7 @@
         h.classList.add("is-active");
       }
       if (route.page === "arbeiten") {
-        if (route.cat) showCat(route.cat);
+        showCat(route.cat || "video");
         onArbeitenShown();
       }
     }
@@ -915,6 +930,7 @@
       wpanels.forEach(function (p) {
         p.classList.toggle("is-active", p.getAttribute("data-panel") === cat);
       });
+      document.documentElement.setAttribute("data-cat", cat);
       if (cat === "video") requestAnimationFrame(function () { requestAnimationFrame(layoutCarousel); });
     }
     catBtns.forEach(function (b) {
