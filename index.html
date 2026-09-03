@@ -862,16 +862,15 @@
       navEl && (navEl.style.opacity = "0");
       footEl && (footEl.style.opacity = "0");
       vid.style.transform = "none";
-      // typography: the two name halves start a touch smaller (anchored at the
-      // inner edge, next to the clip) and ease up to full size as they're revealed
-      // — they appear to grow apart from the centre. NB: must NOT transform
-      // .home__name itself — that would become the containing block for the
-      // position:fixed video and throw it off-screen.
+      // typography: the two name halves wait OFF-SCREEN and slide in from the left
+      // and right once the video has shrunk small. NB: only the spans may be
+      // transformed — transforming .home__name would make it the containing block
+      // for the position:fixed video and throw it off-screen.
       var w1 = nameEl.children[0], w2 = nameEl.children[2];
       if (w1 && w2) {
-        w1.style.transformOrigin = "100% 50%"; w2.style.transformOrigin = "0% 50%";
         w1.style.transition = w2.style.transition = "none";
-        w1.style.transform = w2.style.transform = "scale(.88)";
+        w1.style.transform = "translateX(-52vw)";
+        w2.style.transform = "translateX(52vw)";
       }
       layoutBox();
 
@@ -886,7 +885,6 @@
         if (w1 && w2) {
           w1.style.transition = w2.style.transition = "none";
           w1.style.transform = w2.style.transform = "";
-          w1.style.transformOrigin = w2.style.transformOrigin = "";
           void nameEl.offsetWidth;
           w1.style.transition = w2.style.transition = "";
         }
@@ -901,13 +899,15 @@
         if (started) return;
         started = true;
         layoutBox();                                       // fresh full-screen box (fonts settled)
-        if (w1 && w2) {
-          var te = "transform " + Math.round(DUR * 0.6) + "ms cubic-bezier(.33,1,.68,1)";
+        // the name halves slide in from the edges once the video is small
+        if (w1 && w2) setTimeout(function () {
+          if (finished) return;
+          var te = "transform " + Math.round(DUR * 0.5) + "ms cubic-bezier(.22,1,.32,1)";
           w1.style.transition = w2.style.transition = te;
-          w1.style.transform = w2.style.transform = "scale(1)";
-        }
+          w1.style.transform = w2.style.transform = "translateX(0)";
+        }, DUR * 0.46);
         setTimeout(function () { footEl && (footEl.style.opacity = ""); }, DUR * 0.10);
-        setTimeout(function () { navEl && (navEl.style.opacity = ""); }, DUR * 0.55);
+        setTimeout(function () { navEl && (navEl.style.opacity = ""); }, DUR * 0.62);
         var t0 = performance.now();
         (function frame(now) {
           if (finished) return;
