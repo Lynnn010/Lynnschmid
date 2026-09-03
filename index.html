@@ -178,10 +178,11 @@
   /* ---- intro (matches the reference 1:1): the clip video starts FULL-SCREEN and
          eases DOWN into its slot between the two static name halves. The words
          never move — they are simply uncovered as the video shrinks off them. ---- */
-  html.intro .home__clip { overflow: visible; background: transparent; }
   html.intro .home__clip video {
     position: fixed;
     inset: auto;
+    max-width: none;        /* the global `video { max-width:100% }` must not clamp the full-screen box */
+    max-height: none;
     z-index: 300;
     background: #000;
     transform-origin: center center;
@@ -830,35 +831,38 @@
       var SLOW = /[?&]slow(=(\d+))?/.exec(location.search);
       SLOW = SLOW ? (parseInt(SLOW[2], 10) || 6) : 1;
       var HOLD = 550 * SLOW, DUR = 1900 * SLOW;
-      var EASE = "cubic-bezier(.33, 1, .68, 1)";   // smooth ease-out (easeOutCubic)
-      var vw = window.innerWidth, vh = window.innerHeight;
       var play = function () { var p = vid.play(); if (p && p.catch) p.catch(function () {}); };
       vid.muted = true; play();
 
-      // full-screen box, SAME aspect as the slot (so the object-fit crop never changes),
-      // sized to fully cover the viewport, centred on the viewport
-      var ar = r.width / r.height;
-      var boxW, boxH;
-      if (vw / vh > ar) { boxW = vw; boxH = vw / ar; }
-      else { boxH = vh; boxW = vh * ar; }
-      var boxLeft = Math.round((vw - boxW) / 2), boxTop = Math.round((vh - boxH) / 2);
-      var s = r.width / boxW;
-      // transform-origin is the box centre (= viewport centre). Scale shrinks the box
-      // around its centre; translate then carries that centre to the slot centre.
-      var tx = Math.round((r.left + r.width / 2) - vw / 2);
-      var ty = Math.round((r.top + r.height / 2) - vh / 2);
-      var small = "translate(" + tx + "px," + ty + "px) scale(" + s + ")";
+      // The video is laid out at a fixed FULL-SCREEN box (slot aspect, covers the
+      // viewport). Then a rAF loop eases a transform (translate + scale) that carries
+      // the box's centre onto the slot's centre and shrinks it to the slot's size.
+      // The slot rect is re-read EVERY frame, so any late layout drift (fonts, svh…)
+      // is absorbed continuously and the video lands pixel-exact — no hand-off jump.
+      var box = { w: 0, h: 0, cx: 0, cy: 0 };
+      function layoutBox() {
+        var b = clip.getBoundingClientRect();
+        var vw = window.innerWidth, vh = window.innerHeight;
+        var ar = b.width / b.height;
+        var cx = b.left + b.width / 2, cy = b.top + b.height / 2;
+        var needW = 2 * Math.max(cx, vw - cx) * 1.04;
+        var needH = 2 * Math.max(cy, vh - cy) * 1.04;
+        var boxW = Math.max(needW, needH * ar);
+        var boxH = boxW / ar;
+        if (boxH < needH) { boxH = needH; boxW = boxH * ar; }
+        box.w = boxW; box.h = boxH; box.cx = cx; box.cy = cy;
+        vid.style.transition = "none";
+        vid.style.left = (cx - boxW / 2) + "px";
+        vid.style.top = (cy - boxH / 2) + "px";
+        vid.style.width = boxW + "px";
+        vid.style.height = boxH + "px";
+      }
 
       root.classList.add("intro");
       navEl && (navEl.style.opacity = "0");
       footEl && (footEl.style.opacity = "0");
-      vid.style.transition = "none";
-      vid.style.left = boxLeft + "px";
-      vid.style.top = boxTop + "px";
-      vid.style.width = Math.round(boxW) + "px";
-      vid.style.height = Math.round(boxH) + "px";
-      vid.style.transform = "none";                // start full-screen
-      void vid.offsetWidth;
+      vid.style.transform = "none";
+      layoutBox();
 
       var finished = false;
       function finish() {
@@ -872,21 +876,33 @@
         play();
       }
 
+      function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
       var started = false;
       function run() {
         if (started) return;
         started = true;
-        vid.style.transition = "transform " + DUR + "ms " + EASE;
-        vid.style.transform = small;                        // ease DOWN to the slot
-        setTimeout(function () { footEl && (footEl.style.opacity = ""); }, 150);
+        layoutBox();                                       // fresh full-screen box (fonts settled)
+        setTimeout(function () { footEl && (footEl.style.opacity = ""); }, DUR * 0.10);
         setTimeout(function () { navEl && (navEl.style.opacity = ""); }, DUR * 0.55);
+        var t0 = performance.now();
+        (function frame(now) {
+          if (finished) return;
+          var p = Math.min(1, (now - t0) / DUR);
+          var e = easeOutCubic(p);
+          var b = clip.getBoundingClientRect();          // re-read the slot every frame
+          var slotCx = b.left + b.width / 2, slotCy = b.top + b.height / 2;
+          var scl = 1 + (b.width / box.w - 1) * e;
+          var cx = box.cx + (slotCx - box.cx) * e;
+          var cy = box.cy + (slotCy - box.cy) * e;
+          vid.style.transform = "translate(" + (cx - box.cx) + "px," + (cy - box.cy) + "px) scale(" + scl + ")";
+          if (p < 1) requestAnimationFrame(frame);
+          else finish();
+        })(t0);
       }
 
       setTimeout(run, HOLD);
-      vid.addEventListener("transitionend", function (e) {
-        if (started && e.propertyName === "transform") finish();
-      });
-      setTimeout(finish, HOLD + DUR + 500);                 // safety net
+      setTimeout(finish, HOLD + DUR + 800);                 // safety net
       window.addEventListener("resize", function () { if (!finished) finish(); });
     })();
 
