@@ -366,11 +366,8 @@
   @media (max-width: 560px) { .carousel__nav { width: min(78vw, 300px); } }
 
   /* --- FOTO: gallery --- */
-  .subfilter {
-    display: flex; flex-wrap: wrap; align-items: baseline;
-    gap: clamp(.9rem, 2vw, 1.6rem);
-    margin: 0 0 clamp(1.8rem, 5vh, 3rem);
-  }
+  /* category filter removed at Lynn's request — every photo is shown together */
+  .subfilter { display: none; }
   .subfilter__btn {
     appearance: none; background: none; border: 0; padding: 0; cursor: pointer;
     font-family: var(--font); font-weight: 500;
@@ -398,8 +395,10 @@
   .gallery__item[hidden] { display: none; }
   .gallery__item img,
   .gallery__item .ph { width: 100%; display: block; height: auto; }
-  .gallery__item img { background: var(--paper-2); }
-  .gallery__item .ph { width: 100%; display: block; }
+  .gallery__item img { background: var(--paper-2); transition: opacity .2s ease; }
+  .gallery__item:hover img { opacity: .9; }
+  .gallery__item .ph { width: 100%; display: block; transition: filter .25s ease; }
+  .gallery__item:hover .ph { filter: brightness(.95); }
   .gallery__item:nth-child(5n+1) .ph { aspect-ratio: 4 / 5; }
   .gallery__item:nth-child(5n+2) .ph { aspect-ratio: 3 / 2; }
   .gallery__item:nth-child(5n+3) .ph { aspect-ratio: 1 / 1; }
@@ -641,34 +640,34 @@
           <button class="subfilter__btn" data-sub="produkt">Produkt</button>
         </div>
         <div class="gallery"><button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-02.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-03.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-01.jpg" alt="" loading="lazy" width="1500" height="2250"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-01.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-01.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-02.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-04.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-04.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-03.jpg" alt="" loading="lazy" width="1500" height="2250"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-03.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-02.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-05.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-06.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-07.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-04.jpg" alt="" loading="lazy" width="1400" height="2100"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-05.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-05.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-06.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-07.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-06.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-10.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-08.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-08.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-09.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-11.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-09.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-12.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
           <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-13.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-14.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-03.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-01.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-04.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-02.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-07.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-05.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-06.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-08.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><img src="fotos/portraet-09.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-01.jpg" alt="" loading="lazy" width="1500" height="2250"></button>
-          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-02.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-03.jpg" alt="" loading="lazy" width="1500" height="2250"></button>
-          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-05.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
-          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-04.jpg" alt="" loading="lazy" width="1400" height="2100"></button>
-          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><img src="fotos/produkt-06.jpg" alt="" loading="lazy" width="1600" height="1066"></button></div>
+          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-14.jpg" alt="" loading="lazy" width="1600" height="1066"></button></div>
       </div>
 
       <!-- DESIGN -->
