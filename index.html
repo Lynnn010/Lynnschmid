@@ -175,24 +175,9 @@
     filter: grayscale(1) contrast(1.06) brightness(.98);
   }
 
-  /* ---- intro: the name-clip video is the ONLY video. It's laid out FULL-SCREEN
-         and eased DOWN (scale < 1) into its slot. Scaling a video *down* keeps the
-         decode crisp and cheap; scaling up 20× is what stutters. ---- */
-  html.home-anim .home__clip { overflow: visible; }
-  html.home-anim .home__clip video {
-    position: fixed;
-    inset: auto;
-    z-index: 300;
-    background: #000;
-    transform-origin: 0 0;
-    will-change: transform;
-  }
-  html.home-anim .home__name > span:first-child,
-  html.home-anim .home__name > span:last-child {
-    transition: transform 1s cubic-bezier(.22, 1, .3, 1) .35s,
-                opacity .6s ease .4s;
-    will-change: transform, opacity;
-  }
+  /* ---- intro: nothing changes size. The clip video just plays. On first load the
+         two name halves ease a few px into place and the chrome fades in. ---- */
+  .home__name > span { will-change: transform, opacity; }
 
   .home__foot {
     position: absolute;
@@ -815,108 +800,41 @@
       document.addEventListener("visibilitychange", function () { if (!document.hidden) kick(); });
     })();
 
-    /* ---- intro: the ONE clip video plays full-screen, then shrinks back
-           into its slot. No second video, no hand-off → nothing can glitch. ---- */
+    /* ---- intro: the simple one. Nothing resizes. The name halves ease a few px
+           into place, the nav + footer fade in. The clip video is never touched. ---- */
     (function () {
       var root = document.documentElement;
       var navEl = document.querySelector(".nav");
       var start = sections.start;
       var footEl = start ? start.querySelector(".home__foot") : null;
       var nameEl = start ? start.querySelector(".home__name") : null;
-      var clip = nameEl ? nameEl.querySelector(".home__clip") : null;
-      var vid = clip ? clip.querySelector("video") : null;
       var w1 = nameEl ? nameEl.children[0] : null;
       var w2 = nameEl ? nameEl.children[2] : null;
       var onHome = (routeMap[current()] || {}).page === "start";
       var chrome = [navEl, footEl].filter(Boolean);
-      var reveal = function () { chrome.forEach(function (el) { el.style.opacity = ""; }); };
-
-      if (!nameEl || !clip || !vid || !w1 || !w2 || introReduced || !onHome) {
-        root.classList.add("home-ready");
-        return;
-      }
 
       root.classList.add("home-ready");
-      chrome.forEach(function (el) { el.style.opacity = "0"; });
+      if (!nameEl || !w1 || !w2 || introReduced || !onHome) return;
 
-      var DUR = 1300;
-      var EASE = "cubic-bezier(.22, 1, .3, 1)";   // smooth decelerate — no "stuck then snap"
-      var play = function () { var p = vid.play(); if (p && p.catch) p.catch(function () {}); };
-
-      vid.muted = true;
-      play();
-
-      var r = clip.getBoundingClientRect();
-      if (!r.width || !r.height) {           // layout not ready — skip the effect, just show the page
-        chrome.forEach(function (el) { el.style.opacity = ""; });
-        return;
-      }
-      var vw = window.innerWidth, vh = window.innerHeight;
-      var ar = r.width / r.height;           // slot aspect — the video box keeps it the whole way
-      var fsW = vw;
-      var fsH = Math.round(vw / ar);         // full-screen box, slot aspect (may overhang top/bottom)
-      // end transform (origin 0 0): map the box's (0,0) → the slot's top-left, scale down to slot size
-      var s = r.width / fsW;
-      var small = "translate(" + Math.round(r.left) + "px," + Math.round(r.top) + "px) scale(" + s + ")";
-
-      root.classList.add("home-anim");
-      vid.style.transition = "none";
-      vid.style.top = "0px";
-      vid.style.left = "0px";
-      vid.style.width = fsW + "px";
-      vid.style.height = fsH + "px";
-      vid.style.transform = "translate(0px,0px) scale(1)";   // start FULL-SCREEN
-      // tuck the words in behind the video; they slide OUT + fade in as it shrinks
+      // start state (same tick — no visible flash): halves nudged out + transparent
       w1.style.transition = "none"; w2.style.transition = "none";
-      w1.style.transform = "translateX(26vw)";
-      w2.style.transform = "translateX(-26vw)";
-      w1.style.opacity = "0"; w2.style.opacity = "0";
-      void vid.offsetWidth;
-      w1.style.transition = ""; w2.style.transition = "";
+      w1.style.transform = "translateX(-18px)"; w1.style.opacity = "0";
+      w2.style.transform = "translateX(18px)";  w2.style.opacity = "0";
+      chrome.forEach(function (el) { el.style.opacity = "0"; });
+      void nameEl.offsetWidth;
 
-      var finished = false;
-      function finish() {
-        if (finished) return;
-        finished = true;
-        vid.style.transition = "none";
-        vid.style.position = "";
-        vid.style.top = ""; vid.style.left = "";
-        vid.style.width = ""; vid.style.height = "";
-        vid.style.transform = ""; vid.style.zIndex = "";
-        root.classList.remove("home-anim");
-        w1.style.transition = "none"; w2.style.transition = "none";
-        w1.style.transform = ""; w2.style.transform = "";
-        w1.style.opacity = ""; w2.style.opacity = "";
-        void nameEl.offsetWidth;
-        w1.style.transition = ""; w2.style.transition = "";
-        vid.style.transition = "";
-        play();
-        reveal();
-      }
-
-      var started = false;
-      function run() {
-        if (started) return;
-        started = true;
-        vid.style.transition = "transform " + DUR + "ms " + EASE;
-        vid.style.transform = small;                 // ease DOWN to the slot
-        w1.style.transform = "translateX(0px)";
-        w2.style.transform = "translateX(0px)";
-        w1.style.opacity = "1";
-        w2.style.opacity = "1";
-        setTimeout(reveal, DUR - 250);
-      }
-
-      setTimeout(run, 300);                       // brief full-screen hold, then shrink
-      // the words finish last (their slide-in is delayed) — settle only then, so nothing snaps
-      w2.addEventListener("transitionend", function (e) {
-        if (started && e.propertyName === "transform") finish();
-      });
-      setTimeout(finish, 300 + DUR + 1400);       // safety net
-      window.addEventListener("resize", function () { if (!finished) finish(); });
-      document.addEventListener("visibilitychange", function () {
-        if (!document.hidden && !finished) { run(); setTimeout(finish, 1800); }
-      });
+      setTimeout(function () {
+        var ease = "transform .8s cubic-bezier(.22,1,.3,1), opacity .7s ease";
+        w1.style.transition = ease; w2.style.transition = ease;
+        w1.style.transform = "translateX(0)"; w1.style.opacity = "1";
+        w2.style.transform = "translateX(0)"; w2.style.opacity = "1";
+        chrome.forEach(function (el) { el.style.opacity = ""; });
+        setTimeout(function () {              // drop the inline styles once settled
+          [w1, w2].forEach(function (el) {
+            el.style.transition = ""; el.style.transform = ""; el.style.opacity = "";
+          });
+        }, 950);
+      }, 120);
     })();
 
     /* ================= ARBEITEN — exhibition ================= */
