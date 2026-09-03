@@ -270,10 +270,14 @@
   .carousel__track.is-dragging { transition: none; cursor: grabbing; }
   .slide {
     flex: 0 0 var(--slideW, 64%);
-    opacity: .32;
-    transition: opacity .45s ease;
+    opacity: .28;
+    transition: opacity .45s ease, transform .45s cubic-bezier(.22,1,.3,1);
   }
   .slide.is-current { opacity: 1; }
+  /* the peeking neighbour IS the "go on" cue — it brightens when you point at it */
+  .slide:not(.is-current) { cursor: pointer; }
+  .slide:not(.is-current):hover { opacity: .62; }
+  .slide:not(.is-current) .slide__play { opacity: 0; }
   .slide__media {
     position: relative;
     display: block;
@@ -333,47 +337,43 @@
   .slide__sub { color: var(--ink); font-size: .95rem; margin: .5rem 0 0; }
   .slide__role { color: var(--mute); font-size: .95rem; margin: .15rem 0 0; }
 
-  /* --- carousel nav: a long hairline that draws itself toward the direction --- */
-  .carousel__arrow {
+  /* --- carousel nav: no arrows. A segmented "film-strip" scrubber under the video
+         plus the click-the-peeking-slide affordance. Each segment jumps to its project. --- */
+  .carousel__nav {
     position: absolute;
-    top: calc(var(--media-h, 30vw) / 2);
-    transform: translateY(-50%);
+    top: 0; left: 50%;
+    transform: translate(-50%, calc(-100% - 6px));
     z-index: 3;
-    appearance: none; background: none; border: 0; padding: 0; cursor: pointer;
-    height: 40px;
-    display: flex; align-items: center;
-    color: var(--ink);
-    transition: opacity .2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: clamp(180px, 34vw, 340px);
   }
-  .carousel__arrow-line {
-    position: relative; display: block;
-    width: clamp(30px, 3vw + 18px, 54px); height: 1.5px;
-    background: currentColor;
-    transition: width .32s cubic-bezier(.22, 1, .3, 1);
+  .carousel__seg {
+    appearance: none; border: 0; padding: 10px 0; margin: 0; background: none;
+    flex: 1 1 0; cursor: pointer;
+    position: relative;
   }
-  .carousel__arrow-line::after {
-    content: ""; position: absolute; top: 50%;
-    width: 10px; height: 10px;
-    border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor;
+  .carousel__seg::after {
+    content: ""; display: block; height: 2px;
+    background: var(--line);
+    transition: background .28s ease, height .28s ease;
   }
-  .carousel__arrow--next { right: clamp(-8px, 1.5vw - 22px, 4px); }
-  .carousel__arrow--next .carousel__arrow-line::after { right: -1px; transform: translateY(-50%) rotate(45deg); }
-  .carousel__arrow--prev { left: clamp(-8px, 1.5vw - 22px, 4px); }
-  .carousel__arrow--prev .carousel__arrow-line::after { left: -1px; transform: translateY(-50%) rotate(-135deg); }
-  .carousel__arrow:hover .carousel__arrow-line { width: clamp(48px, 4vw + 30px, 78px); }
-  .carousel__arrow:active .carousel__arrow-line { width: clamp(26px, 3vw, 42px); transition-duration: .1s; }
-  .carousel__arrow[disabled] { opacity: .16; cursor: default; }
-  .carousel__arrow[disabled]:hover .carousel__arrow-line { width: clamp(30px, 3vw + 18px, 54px); }
-
-  .carousel__count {
-    position: absolute; top: -1.9rem; right: 2px;
+  .carousel__seg:hover::after { background: var(--mute); }
+  .carousel__seg[aria-current="true"] { flex-grow: 2.4; cursor: default; }
+  .carousel__seg[aria-current="true"]::after { background: var(--ink); height: 3px; }
+  .carousel__seg[aria-current="true"]:hover::after { background: var(--ink); }
+  .carousel__nav-num {
+    margin-left: 10px;
     font-family: var(--font); font-weight: 500;
     font-size: var(--step-eyebrow); letter-spacing: .04em;
-    color: var(--mute); font-variant-numeric: tabular-nums;
-    z-index: 3;
+    color: var(--mute); font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  .carousel__count b { color: var(--ink); font-weight: 700; }
-  @media (max-width: 640px) { .carousel__count { top: -1.7rem; } }
+  .carousel__nav-num b { color: var(--ink); font-weight: 700; }
+  @media (max-width: 560px) {
+    .carousel__nav { width: min(78vw, 300px); }
+    .carousel__nav-num { display: none; }
+  }
 
   /* --- FOTO: gallery --- */
   .subfilter {
@@ -632,13 +632,7 @@
               </article>
             </div>
           </div>
-          <button class="carousel__arrow carousel__arrow--prev" type="button" aria-label="Vorheriges Projekt">
-            <span class="carousel__arrow-line"></span>
-          </button>
-          <button class="carousel__arrow carousel__arrow--next" type="button" aria-label="Nächstes Projekt">
-            <span class="carousel__arrow-line"></span>
-          </button>
-          <span class="carousel__count" aria-hidden="true"><b>01</b> — 05</span>
+          <div class="carousel__nav" role="tablist" aria-label="Projekt wählen"></div>
         </div>
       </div>
 
@@ -979,9 +973,8 @@
     var cViewport = carousel ? carousel.querySelector(".carousel__viewport") : null;
     var cTrack = carousel ? carousel.querySelector(".carousel__track") : null;
     var cSlides = cTrack ? [].slice.call(cTrack.querySelectorAll(".slide")) : [];
-    var cPrev = carousel ? carousel.querySelector(".carousel__arrow--prev") : null;
-    var cNext = carousel ? carousel.querySelector(".carousel__arrow--next") : null;
-    var cCount = carousel ? carousel.querySelector(".carousel__count") : null;
+    var cNav = carousel ? carousel.querySelector(".carousel__nav") : null;
+    var cSegs = [];
     var cIndex = 0;   /* start on the first project */
     var dragOn = false, dragX0 = 0, dragDX = 0, baseX = 0;
     var playingMedia = null;
@@ -1036,10 +1029,14 @@
       cIndex = Math.max(0, Math.min(cSlides.length - 1, cIndex));
       cSlides.forEach(function (s, i) { s.classList.toggle("is-current", i === cIndex); });
       if (playingMedia && cSlides.indexOf(playingMedia.parentElement) !== cIndex) stopInlinePlayer();
-      if (cPrev) cPrev.disabled = cIndex === 0;
-      if (cNext) cNext.disabled = cIndex === cSlides.length - 1;
-      if (cCount) cCount.innerHTML = "<b>" + ("0" + (cIndex + 1)).slice(-2) + "</b> — " +
-        ("0" + cSlides.length).slice(-2);
+      cSegs.forEach(function (seg, i) {
+        seg.setAttribute("aria-current", i === cIndex ? "true" : "false");
+      });
+      if (cNav) {
+        var num = cNav.querySelector(".carousel__nav-num");
+        if (num) num.innerHTML = "<b>" + ("0" + (cIndex + 1)).slice(-2) + "</b> / " +
+          ("0" + cSlides.length).slice(-2);
+      }
       var media = cSlides[cIndex].querySelector(".slide__media");
       if (media && media.offsetHeight) carousel.style.setProperty("--media-h", media.offsetHeight + "px");
       if (!carouselReady()) return;           // not visible yet — the ResizeObserver will re-run this
@@ -1067,8 +1064,32 @@
       new ResizeObserver(function () { layoutCarousel(); }).observe(cViewport);
     }
 
-    if (cPrev) cPrev.addEventListener("click", function () { goTo(cIndex - 1); });
-    if (cNext) cNext.addEventListener("click", function () { goTo(cIndex + 1); });
+    /* build the segmented scrubber — one segment per project, click to jump */
+    if (cNav && cSlides.length) {
+      cSlides.forEach(function (s, i) {
+        var seg = document.createElement("button");
+        seg.type = "button";
+        seg.className = "carousel__seg";
+        seg.setAttribute("role", "tab");
+        var t = s.querySelector(".slide__title");
+        seg.setAttribute("aria-label", t ? t.textContent : "Projekt " + (i + 1));
+        seg.addEventListener("click", function () { if (i !== cIndex) goTo(i); });
+        cNav.appendChild(seg);
+        cSegs.push(seg);
+      });
+      var num = document.createElement("span");
+      num.className = "carousel__nav-num";
+      num.setAttribute("aria-hidden", "true");
+      cNav.appendChild(num);
+    }
+    /* keyboard: ← / → page through the carousel while the VIDEO panel is on screen */
+    document.addEventListener("keydown", function (e) {
+      if (document.documentElement.getAttribute("data-cat") !== "video") return;
+      if (!sections.arbeiten.classList.contains("is-active")) return;
+      if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      if (e.key === "ArrowLeft") goTo(cIndex - 1);
+      else if (e.key === "ArrowRight") goTo(cIndex + 1);
+    });
 
     cSlides.forEach(function (s, i) {
       var media = s.querySelector(".slide__media");
