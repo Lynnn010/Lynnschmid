@@ -436,6 +436,27 @@
     transition: transform .45s cubic-bezier(.22, 1, .3, 1);
   }
   .dcard:hover .dcard__media--logo img { transform: scale(1.03); }
+  /* a set of print pieces: contained thumbnails that open a paged lightbox */
+  .dcard__media--set {
+    aspect-ratio: auto;
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: clamp(.55rem, 1.6vw, 1.1rem);
+    align-items: stretch;
+  }
+  .dset__item {
+    appearance: none; -webkit-appearance: none; border: 0; margin: 0; padding: 0;
+    background: var(--paper-2); cursor: pointer; overflow: hidden;
+    aspect-ratio: 1 / 1.32;
+    display: grid; place-items: center;
+    transition: transform .3s cubic-bezier(.22, 1, .3, 1), box-shadow .3s ease;
+  }
+  .dset__item img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .dset__item--logo img { padding: 16%; }
+  .dcard:hover .dset__item { box-shadow: 0 14px 32px -16px rgba(11, 11, 11, .2); }
+  .dset__item:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -12px rgba(11, 11, 11, .26); }
+  @media (hover: none) {
+    .dset__item:hover, .dcard:hover .dset__item { transform: none; box-shadow: none; }
+  }
   .dcard__title {
     font-family: var(--font); font-weight: 700; letter-spacing: -0.03em;
     font-size: clamp(1.5rem, 1rem + 2.2vw, 2.4rem); line-height: 1.05; margin: 0;
@@ -716,6 +737,25 @@
               <h3 class="dcard__title">01 Rettungsdienst Emmental&#8209;Oberaargau</h3>
               <p class="dcard__sub">Logo · Emblem · Vektorgrafik</p>
               <p class="dcard__desc">Crew-Abzeichen für den Rettungsdienst der Region Emmental-Oberaargau. Der Star of Life bildet das Zentrum, umringt vom Einsatzgebiet als Kartensilhouette, dem Berner Wappen, regionalen Wahrzeichen und einer durchlaufenden EKG-Linie.</p>
+            </div>
+          </article>
+
+          <article class="dcard">
+            <div class="dcard__media dcard__media--set">
+              <button class="dset__item" type="button" aria-label="Grösser ansehen: Flyer JetSetGo, Variante A">
+                <img src="design/printprodukt-flyer-a.webp" alt="Eventflyer JetSetGo – Variante mit Strandmotiv" loading="lazy">
+              </button>
+              <button class="dset__item" type="button" aria-label="Grösser ansehen: Flyer JetSetGo, Variante B">
+                <img src="design/printprodukt-flyer-b.webp" alt="Eventflyer JetSetGo – Variante mit Luftaufnahme" loading="lazy">
+              </button>
+              <button class="dset__item dset__item--logo" type="button" aria-label="Grösser ansehen: Logo JetSetGo">
+                <img src="design/printprodukt-logo-jetsetgo.webp" alt="Bildmarke JetSetGo" loading="lazy">
+              </button>
+            </div>
+            <div>
+              <h3 class="dcard__title">02 Printprodukte JetSetGo</h3>
+              <p class="dcard__sub">Flyer · Logo · ÜK-Projekt</p>
+              <p class="dcard__desc">Fiktives Reisebüro JetSetGo: Im überbetrieblichen Kurs entstanden die Bildmarke und zwei Gestaltungsvarianten für den Event-Flyer «Jetzt Traumreise planen». Beide arbeiten mit einem grossflächigen Seychellen-Bild, dem dunkelblauen Infoblock und dem runden «Gratis Event»-Störer – einmal mit seitlichem Strandmotiv, einmal mit einer Luftaufnahme.</p>
             </div>
           </article>
         </div>
@@ -1301,6 +1341,21 @@
       it.addEventListener("click", function () { openPhotoFrom(it, galItems); });
     });
     (work ? [].slice.call(work.querySelectorAll(".dcard__media")) : []).forEach(function (m) {
+      var setItems = [].slice.call(m.querySelectorAll(".dset__item"));
+      if (setItems.length) {
+        var urls = setItems.map(function (b) {
+          var i = b.querySelector("img");
+          return i ? (i.getAttribute("data-full") || i.src) : "ph";
+        });
+        setItems.forEach(function (b, i) {
+          b.addEventListener("click", function (e) {
+            e.stopPropagation();
+            lbList = urls; lbPos = i; lbMode = "photo";
+            lbRenderPhoto(); openLb();
+          });
+        });
+        return;
+      }
       m.addEventListener("click", function () {
         var img = m.querySelector("img");
         openSingle(img ? (img.getAttribute("data-full") || img.src) : m.querySelector(".ph").className);
