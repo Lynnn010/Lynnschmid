@@ -415,18 +415,16 @@
   .dcard__media { position: relative; width: 100%; aspect-ratio: 16 / 10; cursor: pointer; }
   .dcard__media .ph { position: absolute; inset: 0; transition: filter .25s ease; }
   .dcard:hover .dcard__media .ph { filter: brightness(.95); }
-  /* a logo / emblem sits centred on a white field, framed by a hairline */
+  /* a logo / emblem sits centred on a white field, no frame */
   .dcard__media--logo {
     aspect-ratio: 5 / 4;
     background: #ffffff;
-    border: 1px solid var(--line);
     display: grid; place-items: center;
     padding: clamp(1.6rem, 5vw, 3.6rem);
     overflow: hidden;
-    transition: border-color .3s ease, box-shadow .3s ease;
+    transition: box-shadow .3s ease;
   }
   .dcard:hover .dcard__media--logo {
-    border-color: rgba(11, 11, 11, .22);
     box-shadow: 0 18px 44px -14px rgba(11, 11, 11, .18);
   }
   .dcard__media--logo img {
