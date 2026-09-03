@@ -412,7 +412,8 @@
   /* --- DESIGN: large project blocks --- */
   .dcards { display: grid; gap: clamp(3.5rem, 11vh, 7.5rem); }
   .dcard { display: grid; gap: clamp(1.1rem, 3vh, 1.8rem); }
-  .dcard__media { position: relative; width: 100%; aspect-ratio: 16 / 10; cursor: pointer; }
+  .dcard__media { position: relative; width: 100%; aspect-ratio: 16 / 10; cursor: pointer;
+    border: 0; padding: 0; background: none; -webkit-appearance: none; appearance: none; font: inherit; color: inherit; }
   .dcard__media .ph { position: absolute; inset: 0; transition: filter .25s ease; }
   .dcard:hover .dcard__media .ph { filter: brightness(.95); }
   /* a logo / emblem sits centred on a white field, no frame */
