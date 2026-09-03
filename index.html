@@ -184,7 +184,7 @@
     inset: auto;
     z-index: 300;
     background: #000;
-    transform-origin: 0 0;
+    transform-origin: center center;
     will-change: transform;
   }
 
@@ -836,15 +836,18 @@
       vid.muted = true; play();
 
       // full-screen box, SAME aspect as the slot (so the object-fit crop never changes),
-      // sized to fully cover the viewport, centred
+      // sized to fully cover the viewport, centred on the viewport
       var ar = r.width / r.height;
       var boxW, boxH;
       if (vw / vh > ar) { boxW = vw; boxH = vw / ar; }
       else { boxH = vh; boxW = vh * ar; }
       var boxLeft = Math.round((vw - boxW) / 2), boxTop = Math.round((vh - boxH) / 2);
       var s = r.width / boxW;
-      var small = "translate(" + Math.round(r.left - boxLeft) + "px," +
-                  Math.round(r.top - boxTop) + "px) scale(" + s + ")";
+      // transform-origin is the box centre (= viewport centre). Scale shrinks the box
+      // around its centre; translate then carries that centre to the slot centre.
+      var tx = Math.round((r.left + r.width / 2) - vw / 2);
+      var ty = Math.round((r.top + r.height / 2) - vh / 2);
+      var small = "translate(" + tx + "px," + ty + "px) scale(" + s + ")";
 
       root.classList.add("intro");
       navEl && (navEl.style.opacity = "0");
