@@ -175,17 +175,16 @@
     filter: grayscale(1) contrast(1.06) brightness(.98);
   }
 
-  /* ---- intro: the name-clip video is the ONLY video. It's blown up with a
-         GPU transform (scale+translate), then eased back to transform:none —
-         its box, aspect-ratio and object-fit crop never change, so the framing
-         is identical the whole way and there is no hand-off to glitch. ---- */
+  /* ---- intro: the name-clip video is the ONLY video. It's laid out FULL-SCREEN
+         and eased DOWN (scale < 1) into its slot. Scaling a video *down* keeps the
+         decode crisp and cheap; scaling up 20× is what stutters. ---- */
   html.home-anim .home__clip { overflow: visible; }
   html.home-anim .home__clip video {
     position: fixed;
     inset: auto;
     z-index: 300;
     background: #000;
-    transform-origin: center center;
+    transform-origin: 0 0;
     will-change: transform;
   }
   html.home-anim .home__name > span:first-child,
@@ -847,27 +846,27 @@
       vid.muted = true;
       play();
 
-      // pin the video to its slot rect, then blow it up with a GPU transform
       var r = clip.getBoundingClientRect();
       if (!r.width || !r.height) {           // layout not ready — skip the effect, just show the page
         chrome.forEach(function (el) { el.style.opacity = ""; });
         return;
       }
       var vw = window.innerWidth, vh = window.innerHeight;
-      var scale = Math.max(vw / r.width, vh / r.height) * 1.04;
-      var tx = Math.round(vw / 2 - (r.left + r.width / 2));
-      var ty = Math.round(vh / 2 - (r.top + r.height / 2));
-      var big = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
+      var ar = r.width / r.height;           // slot aspect — the video box keeps it the whole way
+      var fsW = vw;
+      var fsH = Math.round(vw / ar);         // full-screen box, slot aspect (may overhang top/bottom)
+      // end transform (origin 0 0): map the box's (0,0) → the slot's top-left, scale down to slot size
+      var s = r.width / fsW;
+      var small = "translate(" + Math.round(r.left) + "px," + Math.round(r.top) + "px) scale(" + s + ")";
 
       root.classList.add("home-anim");
       vid.style.transition = "none";
-      vid.style.top = r.top + "px";
-      vid.style.left = r.left + "px";
-      vid.style.width = r.width + "px";
-      vid.style.height = r.height + "px";
-      vid.style.transform = big;
-      // tuck the words in behind the (full-screen) video, WITHOUT animating them there;
-      // they then slide OUT to their places as the video shrinks — "out of the video"
+      vid.style.top = "0px";
+      vid.style.left = "0px";
+      vid.style.width = fsW + "px";
+      vid.style.height = fsH + "px";
+      vid.style.transform = "translate(0px,0px) scale(1)";   // start FULL-SCREEN
+      // tuck the words in behind the video; they slide OUT + fade in as it shrinks
       w1.style.transition = "none"; w2.style.transition = "none";
       w1.style.transform = "translateX(26vw)";
       w2.style.transform = "translateX(-26vw)";
@@ -900,7 +899,7 @@
         if (started) return;
         started = true;
         vid.style.transition = "transform " + DUR + "ms " + EASE;
-        vid.style.transform = "translate(0px,0px) scale(1)";
+        vid.style.transform = small;                 // ease DOWN to the slot
         w1.style.transform = "translateX(0px)";
         w2.style.transform = "translateX(0px)";
         w1.style.opacity = "1";
