@@ -333,24 +333,47 @@
   .slide__sub { color: var(--ink); font-size: .95rem; margin: .5rem 0 0; }
   .slide__role { color: var(--mute); font-size: .95rem; margin: .15rem 0 0; }
 
+  /* --- carousel nav: a long hairline that draws itself toward the direction --- */
   .carousel__arrow {
     position: absolute;
     top: calc(var(--media-h, 30vw) / 2);
     transform: translateY(-50%);
     z-index: 3;
     appearance: none; background: none; border: 0; padding: 0; cursor: pointer;
-    width: clamp(34px, 4.5vw, 52px); height: clamp(34px, 4.5vw, 52px);
-    display: grid; place-items: center;
+    height: 40px;
+    display: flex; align-items: center;
     color: var(--ink);
-    transition: transform .18s ease, opacity .18s ease;
+    transition: opacity .2s ease;
   }
-  .carousel__arrow:hover { transform: translateY(-50%) scale(1.12); }
-  .carousel__arrow:active { transform: translateY(-50%) scale(.9); }
-  .carousel__arrow svg { width: 100%; height: 100%; }
-  .carousel__arrow--prev { left: clamp(-4px, 0vw, 6px); }
-  .carousel__arrow--next { right: clamp(-4px, 0vw, 6px); }
-  .carousel__arrow[disabled] { opacity: .2; cursor: default; }
-  .carousel__arrow[disabled]:hover { transform: translateY(-50%); }
+  .carousel__arrow-line {
+    position: relative; display: block;
+    width: clamp(30px, 3vw + 18px, 54px); height: 1.5px;
+    background: currentColor;
+    transition: width .32s cubic-bezier(.22, 1, .3, 1);
+  }
+  .carousel__arrow-line::after {
+    content: ""; position: absolute; top: 50%;
+    width: 10px; height: 10px;
+    border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor;
+  }
+  .carousel__arrow--next { right: clamp(-8px, 1.5vw - 22px, 4px); }
+  .carousel__arrow--next .carousel__arrow-line::after { right: -1px; transform: translateY(-50%) rotate(45deg); }
+  .carousel__arrow--prev { left: clamp(-8px, 1.5vw - 22px, 4px); }
+  .carousel__arrow--prev .carousel__arrow-line::after { left: -1px; transform: translateY(-50%) rotate(-135deg); }
+  .carousel__arrow:hover .carousel__arrow-line { width: clamp(48px, 4vw + 30px, 78px); }
+  .carousel__arrow:active .carousel__arrow-line { width: clamp(26px, 3vw, 42px); transition-duration: .1s; }
+  .carousel__arrow[disabled] { opacity: .16; cursor: default; }
+  .carousel__arrow[disabled]:hover .carousel__arrow-line { width: clamp(30px, 3vw + 18px, 54px); }
+
+  .carousel__count {
+    position: absolute; top: -1.9rem; right: 2px;
+    font-family: var(--font); font-weight: 500;
+    font-size: var(--step-eyebrow); letter-spacing: .04em;
+    color: var(--mute); font-variant-numeric: tabular-nums;
+    z-index: 3;
+  }
+  .carousel__count b { color: var(--ink); font-weight: 700; }
+  @media (max-width: 640px) { .carousel__count { top: -1.7rem; } }
 
   /* --- FOTO: gallery --- */
   .subfilter {
@@ -610,11 +633,12 @@
             </div>
           </div>
           <button class="carousel__arrow carousel__arrow--prev" type="button" aria-label="Vorheriges Projekt">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+            <span class="carousel__arrow-line"></span>
           </button>
           <button class="carousel__arrow carousel__arrow--next" type="button" aria-label="Nächstes Projekt">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+            <span class="carousel__arrow-line"></span>
           </button>
+          <span class="carousel__count" aria-hidden="true"><b>01</b> — 05</span>
         </div>
       </div>
 
@@ -957,6 +981,7 @@
     var cSlides = cTrack ? [].slice.call(cTrack.querySelectorAll(".slide")) : [];
     var cPrev = carousel ? carousel.querySelector(".carousel__arrow--prev") : null;
     var cNext = carousel ? carousel.querySelector(".carousel__arrow--next") : null;
+    var cCount = carousel ? carousel.querySelector(".carousel__count") : null;
     var cIndex = 0;   /* start on the first project */
     var dragOn = false, dragX0 = 0, dragDX = 0, baseX = 0;
     var playingMedia = null;
@@ -1013,6 +1038,8 @@
       if (playingMedia && cSlides.indexOf(playingMedia.parentElement) !== cIndex) stopInlinePlayer();
       if (cPrev) cPrev.disabled = cIndex === 0;
       if (cNext) cNext.disabled = cIndex === cSlides.length - 1;
+      if (cCount) cCount.innerHTML = "<b>" + ("0" + (cIndex + 1)).slice(-2) + "</b> — " +
+        ("0" + cSlides.length).slice(-2);
       var media = cSlides[cIndex].querySelector(".slide__media");
       if (media && media.offsetHeight) carousel.style.setProperty("--media-h", media.offsetHeight + "px");
       if (!carouselReady()) return;           // not visible yet — the ResizeObserver will re-run this
