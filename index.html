@@ -363,17 +363,7 @@
   .carousel__seg[aria-current="true"] { flex-grow: 2.4; cursor: default; }
   .carousel__seg[aria-current="true"]::after { background: var(--ink); height: 3px; }
   .carousel__seg[aria-current="true"]:hover::after { background: var(--ink); }
-  .carousel__nav-num {
-    margin-left: 10px;
-    font-family: var(--font); font-weight: 500;
-    font-size: var(--step-eyebrow); letter-spacing: .04em;
-    color: var(--mute); font-variant-numeric: tabular-nums; white-space: nowrap;
-  }
-  .carousel__nav-num b { color: var(--ink); font-weight: 700; }
-  @media (max-width: 560px) {
-    .carousel__nav { width: min(78vw, 300px); }
-    .carousel__nav-num { display: none; }
-  }
+  @media (max-width: 560px) { .carousel__nav { width: min(78vw, 300px); } }
 
   /* --- FOTO: gallery --- */
   .subfilter {
@@ -1032,11 +1022,6 @@
       cSegs.forEach(function (seg, i) {
         seg.setAttribute("aria-current", i === cIndex ? "true" : "false");
       });
-      if (cNav) {
-        var num = cNav.querySelector(".carousel__nav-num");
-        if (num) num.innerHTML = "<b>" + ("0" + (cIndex + 1)).slice(-2) + "</b> / " +
-          ("0" + cSlides.length).slice(-2);
-      }
       var media = cSlides[cIndex].querySelector(".slide__media");
       if (media && media.offsetHeight) carousel.style.setProperty("--media-h", media.offsetHeight + "px");
       if (!carouselReady()) return;           // not visible yet — the ResizeObserver will re-run this
@@ -1077,10 +1062,6 @@
         cNav.appendChild(seg);
         cSegs.push(seg);
       });
-      var num = document.createElement("span");
-      num.className = "carousel__nav-num";
-      num.setAttribute("aria-hidden", "true");
-      cNav.appendChild(num);
     }
     /* keyboard: ← / → page through the carousel while the VIDEO panel is on screen */
     document.addEventListener("keydown", function (e) {
