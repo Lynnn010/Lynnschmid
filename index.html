@@ -396,6 +396,10 @@
     border: 0; padding: 0; background: none; cursor: pointer;
   }
   .gallery__item[hidden] { display: none; }
+  .gallery__item img,
+  .gallery__item .ph { width: 100%; display: block; height: auto; }
+  .gallery__item img { background: var(--paper-2); transition: opacity .2s ease; }
+  .gallery__item:hover img { opacity: .9; }
   .gallery__item .ph { width: 100%; display: block; transition: filter .25s ease; }
   .gallery__item:hover .ph { filter: brightness(.95); }
   .gallery__item:nth-child(5n+1) .ph { aspect-ratio: 4 / 5; }
@@ -430,6 +434,7 @@
   .lightbox[hidden] { display: none; }
   .lightbox__stage { display: grid; place-items: center; max-width: 1180px; width: 100%; }
   .lightbox__stage .ph { width: min(88vw, 1180px); max-height: 82vh; aspect-ratio: 3 / 2; }
+  .lightbox__stage img { max-width: min(92vw, 1180px); max-height: 84vh; width: auto; height: auto; display: block; }
   .lightbox__stage video {
     width: min(90vw, 1180px); max-height: 82vh; display: block; background: #000;
   }
@@ -632,29 +637,16 @@
           <button class="subfilter__btn is-active" data-sub="alle">Alle</button>
           <span class="subfilter__sep" aria-hidden="true">·</span>
           <button class="subfilter__btn" data-sub="event">Event</button>
-          <span class="subfilter__sep" aria-hidden="true">·</span>
-          <button class="subfilter__btn" data-sub="portraet">Porträt</button>
-          <span class="subfilter__sep" aria-hidden="true">·</span>
-          <button class="subfilter__btn" data-sub="produkt">Produkt</button>
-          <span class="subfilter__sep" aria-hidden="true">·</span>
-          <button class="subfilter__btn" data-sub="reportage">Reportage</button>
         </div>
-        <div class="gallery">
-          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><span class="ph ph--b"></span></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><span class="ph ph--c"></span></button>
-          <button class="gallery__item" type="button" data-sub="reportage" aria-label="Foto öffnen"><span class="ph ph--d"></span></button>
-          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><span class="ph ph--e"></span></button>
-          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><span class="ph ph--f"></span></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><span class="ph"></span></button>
-          <button class="gallery__item" type="button" data-sub="reportage" aria-label="Foto öffnen"><span class="ph ph--e"></span></button>
-          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><span class="ph ph--b"></span></button>
-          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><span class="ph ph--d"></span></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><span class="ph ph--f"></span></button>
-          <button class="gallery__item" type="button" data-sub="reportage" aria-label="Foto öffnen"><span class="ph ph--c"></span></button>
-          <button class="gallery__item" type="button" data-sub="produkt" aria-label="Foto öffnen"><span class="ph"></span></button>
-          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><span class="ph ph--c"></span></button>
-          <button class="gallery__item" type="button" data-sub="portraet" aria-label="Foto öffnen"><span class="ph ph--e"></span></button>
-        </div>
+        <div class="gallery"><button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-02.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-01.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-04.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-03.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-06.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-05.jpg" alt="" loading="lazy" width="1600" height="1066"></button>
+          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-07.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-08.jpg" alt="" loading="lazy" width="1600" height="2400"></button>
+          <button class="gallery__item" type="button" data-sub="event" aria-label="Foto öffnen"><img src="fotos/event-09.jpg" alt="" loading="lazy" width="1600" height="2400"></button></div>
       </div>
 
       <!-- DESIGN -->
@@ -1163,9 +1155,17 @@
 
     function lbRenderPhoto() {
       lbStage.innerHTML = "";
-      var d = document.createElement("div");
-      d.className = lbList[lbPos] || "ph";
-      lbStage.appendChild(d);
+      var item = lbList[lbPos] || "ph";
+      var el;
+      if (/\.(jpe?g|png|webp|avif)(\?|$)/i.test(item)) {
+        el = document.createElement("img");
+        el.src = item;
+        el.alt = "";
+      } else {
+        el = document.createElement("div");
+        el.className = item;
+      }
+      lbStage.appendChild(el);
       var multi = lbList.length > 1;
       lbPrev.hidden = !multi;
       lbNext.hidden = !multi;
@@ -1187,7 +1187,12 @@
     }
     function openPhotoFrom(el, pool) {
       var visible = pool.filter(function (it) { return !it.hidden; });
-      lbList = visible.map(function (it) { return it.querySelector(".ph").className; });
+      lbList = visible.map(function (it) {
+        var img = it.querySelector("img");
+        if (img) return img.getAttribute("data-full") || img.src;
+        var ph = it.querySelector(".ph");
+        return ph ? ph.className : "ph";
+      });
       lbPos = Math.max(0, visible.indexOf(el));
       lbMode = "photo";
       lbRenderPhoto();
