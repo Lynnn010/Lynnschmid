@@ -190,8 +190,9 @@
   }
   html.home-anim .home__name > span:first-child,
   html.home-anim .home__name > span:last-child {
-    transition: transform .9s cubic-bezier(.4, 0, .1, 1) .95s;
-    will-change: transform;
+    transition: transform 1s cubic-bezier(.22, 1, .3, 1) .35s,
+                opacity .6s ease .4s;
+    will-change: transform, opacity;
   }
 
   .home__foot {
@@ -839,8 +840,8 @@
       root.classList.add("home-ready");
       chrome.forEach(function (el) { el.style.opacity = "0"; });
 
-      var DUR = 1500;
-      var EASE = "cubic-bezier(.72,0,.12,1)";
+      var DUR = 1300;
+      var EASE = "cubic-bezier(.22, 1, .3, 1)";   // smooth decelerate — no "stuck then snap"
       var play = function () { var p = vid.play(); if (p && p.catch) p.catch(function () {}); };
 
       vid.muted = true;
@@ -848,6 +849,10 @@
 
       // pin the video to its slot rect, then blow it up with a GPU transform
       var r = clip.getBoundingClientRect();
+      if (!r.width || !r.height) {           // layout not ready — skip the effect, just show the page
+        chrome.forEach(function (el) { el.style.opacity = ""; });
+        return;
+      }
       var vw = window.innerWidth, vh = window.innerHeight;
       var scale = Math.max(vw / r.width, vh / r.height) * 1.04;
       var tx = Math.round(vw / 2 - (r.left + r.width / 2));
@@ -861,10 +866,12 @@
       vid.style.width = r.width + "px";
       vid.style.height = r.height + "px";
       vid.style.transform = big;
-      // park the words fully off-screen WITHOUT animating them there
+      // tuck the words in behind the (full-screen) video, WITHOUT animating them there;
+      // they then slide OUT to their places as the video shrinks — "out of the video"
       w1.style.transition = "none"; w2.style.transition = "none";
-      w1.style.transform = "translateX(-64vw)";
-      w2.style.transform = "translateX(64vw)";
+      w1.style.transform = "translateX(26vw)";
+      w2.style.transform = "translateX(-26vw)";
+      w1.style.opacity = "0"; w2.style.opacity = "0";
       void vid.offsetWidth;
       w1.style.transition = ""; w2.style.transition = "";
 
@@ -880,6 +887,7 @@
         root.classList.remove("home-anim");
         w1.style.transition = "none"; w2.style.transition = "none";
         w1.style.transform = ""; w2.style.transform = "";
+        w1.style.opacity = ""; w2.style.opacity = "";
         void nameEl.offsetWidth;
         w1.style.transition = ""; w2.style.transition = "";
         vid.style.transition = "";
@@ -895,15 +903,17 @@
         vid.style.transform = "translate(0px,0px) scale(1)";
         w1.style.transform = "translateX(0px)";
         w2.style.transform = "translateX(0px)";
+        w1.style.opacity = "1";
+        w2.style.opacity = "1";
         setTimeout(reveal, DUR - 250);
       }
 
-      setTimeout(run, 480);                       // brief full-screen hold, then shrink
+      setTimeout(run, 300);                       // brief full-screen hold, then shrink
       // the words finish last (their slide-in is delayed) — settle only then, so nothing snaps
       w2.addEventListener("transitionend", function (e) {
         if (started && e.propertyName === "transform") finish();
       });
-      setTimeout(finish, 480 + DUR + 1500);       // safety net
+      setTimeout(finish, 300 + DUR + 1400);       // safety net
       window.addEventListener("resize", function () { if (!finished) finish(); });
       document.addEventListener("visibilitychange", function () {
         if (!document.hidden && !finished) { run(); setTimeout(finish, 1800); }
