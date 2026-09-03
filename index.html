@@ -415,11 +415,38 @@
   .dcard__media { position: relative; width: 100%; aspect-ratio: 16 / 10; cursor: pointer; }
   .dcard__media .ph { position: absolute; inset: 0; transition: filter .25s ease; }
   .dcard:hover .dcard__media .ph { filter: brightness(.95); }
+  /* a logo / emblem sits centred on a white field, framed by a hairline */
+  .dcard__media--logo {
+    aspect-ratio: 5 / 4;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    display: grid; place-items: center;
+    padding: clamp(1.6rem, 5vw, 3.6rem);
+    overflow: hidden;
+    transition: border-color .3s ease, box-shadow .3s ease;
+  }
+  .dcard:hover .dcard__media--logo {
+    border-color: rgba(11, 11, 11, .22);
+    box-shadow: 0 18px 44px -14px rgba(11, 11, 11, .18);
+  }
+  .dcard__media--logo img {
+    max-width: 100%; max-height: 100%;
+    min-width: 0; min-height: 0;
+    width: auto; height: auto;
+    object-fit: contain;
+    transition: transform .45s cubic-bezier(.22, 1, .3, 1);
+  }
+  .dcard:hover .dcard__media--logo img { transform: scale(1.03); }
   .dcard__title {
     font-family: var(--font); font-weight: 700; letter-spacing: -0.03em;
-    font-size: clamp(1.5rem, 1rem + 2.2vw, 2.4rem); line-height: 1.02; margin: 0;
+    font-size: clamp(1.5rem, 1rem + 2.2vw, 2.4rem); line-height: 1.05; margin: 0;
+    text-wrap: balance;
   }
-  .dcard__sub { color: var(--mute); font-size: .95rem; margin: .4rem 0 0; }
+  .dcard__sub { color: var(--mute); font-size: .95rem; margin: .5rem 0 0; letter-spacing: .01em; }
+  .dcard__desc {
+    margin: 1.1rem 0 0; color: var(--ink-soft);
+    font-size: .98rem; line-height: 1.5; max-width: 42ch;
+  }
   @media (min-width: 900px) {
     .dcard { grid-template-columns: 1.4fr .6fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
   }
@@ -682,31 +709,14 @@
       <div class="wpanel" data-panel="design">
         <div class="dcards">
           <article class="dcard">
-            <button class="dcard__media" type="button" aria-label="Projekt öffnen"><span class="ph ph--d"></span></button>
+            <button class="dcard__media dcard__media--logo" type="button"
+              aria-label="Grösser ansehen: 01 Logo Rettungsdienst Emmental-Oberaargau">
+              <img src="design/logo-rettungsdienst.webp" alt="Emblem Rettungsdienst Emmental-Oberaargau" loading="lazy">
+            </button>
             <div>
-              <h3 class="dcard__title">Projekttitel 01</h3>
-              <p class="dcard__sub">Branding · Visual Identity</p>
-            </div>
-          </article>
-          <article class="dcard">
-            <button class="dcard__media" type="button" aria-label="Projekt öffnen"><span class="ph ph--f"></span></button>
-            <div>
-              <h3 class="dcard__title">Projekttitel 02</h3>
-              <p class="dcard__sub">Editorial · Layout &amp; Satz</p>
-            </div>
-          </article>
-          <article class="dcard">
-            <button class="dcard__media" type="button" aria-label="Projekt öffnen"><span class="ph ph--b"></span></button>
-            <div>
-              <h3 class="dcard__title">Projekttitel 03</h3>
-              <p class="dcard__sub">Web · UI &amp; Design System</p>
-            </div>
-          </article>
-          <article class="dcard">
-            <button class="dcard__media" type="button" aria-label="Projekt öffnen"><span class="ph ph--c"></span></button>
-            <div>
-              <h3 class="dcard__title">Projekttitel 04</h3>
-              <p class="dcard__sub">Kampagne · Art Direction</p>
+              <h3 class="dcard__title">01 Rettungsdienst Emmental&#8209;Oberaargau</h3>
+              <p class="dcard__sub">Logo · Emblem · Vektorgrafik</p>
+              <p class="dcard__desc">Crew-Abzeichen für den Rettungsdienst der Region Emmental-Oberaargau. Der Star of Life bildet das Zentrum, umringt vom Einsatzgebiet als Kartensilhouette, dem Berner Wappen, regionalen Wahrzeichen und einer durchlaufenden EKG-Linie.</p>
             </div>
           </article>
         </div>
@@ -1292,7 +1302,10 @@
       it.addEventListener("click", function () { openPhotoFrom(it, galItems); });
     });
     (work ? [].slice.call(work.querySelectorAll(".dcard__media")) : []).forEach(function (m) {
-      m.addEventListener("click", function () { openSingle(m.querySelector(".ph").className); });
+      m.addEventListener("click", function () {
+        var img = m.querySelector("img");
+        openSingle(img ? (img.getAttribute("data-full") || img.src) : m.querySelector(".ph").className);
+      });
     });
 
     /* ---- relayout hooks ---- */
