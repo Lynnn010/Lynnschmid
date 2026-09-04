@@ -409,72 +409,101 @@
   .gallery__item:nth-child(5n+4) .ph { aspect-ratio: 5 / 6; }
   .gallery__item:nth-child(5n+5) .ph { aspect-ratio: 4 / 3; }
 
-  /* --- DESIGN: large project blocks --- */
-  .dcards { display: grid; gap: clamp(3.5rem, 11vh, 7.5rem); }
-  .dcard { display: grid; gap: clamp(1.1rem, 3vh, 1.8rem); }
-  .dcard__media { position: relative; width: 100%; aspect-ratio: 16 / 10; cursor: pointer;
-    border: 0; padding: 0; background: none; -webkit-appearance: none; appearance: none; font: inherit; color: inherit; }
-  .dcard__media .ph { position: absolute; inset: 0; transition: filter .25s ease; }
-  .dcard:hover .dcard__media .ph { filter: brightness(.95); }
-  /* a logo / emblem sits centred on a white field, no frame */
-  .dcard__media--logo {
-    aspect-ratio: 5 / 4;
-    background: #ffffff;
-    display: grid; place-items: center;
-    padding: clamp(1.6rem, 5vw, 3.6rem);
-    overflow: hidden;
-    transition: box-shadow .3s ease;
+  /* --- DESIGN: folders that pop open --- */
+  .dfolders {
+    display: grid; gap: clamp(1.4rem, 4vw, 2.6rem);
+    grid-template-columns: 1fr; max-width: 760px;
   }
-  .dcard:hover .dcard__media--logo {
-    box-shadow: 0 18px 44px -14px rgba(11, 11, 11, .18);
+  @media (min-width: 640px) { .dfolders { grid-template-columns: 1fr 1fr; } }
+  .dfolder {
+    appearance: none; -webkit-appearance: none;
+    border: 1px solid var(--line); background: none; cursor: pointer;
+    text-align: left; color: var(--ink);
+    display: grid; justify-items: start; gap: .5rem;
+    padding: clamp(1.5rem, 4vw, 2.4rem);
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
   }
-  .dcard__media--logo img {
-    max-width: 100%; max-height: 100%;
-    min-width: 0; min-height: 0;
-    width: auto; height: auto;
-    object-fit: contain;
-    transition: transform .45s cubic-bezier(.22, 1, .3, 1);
+  .dfolder:hover, .dfolder:focus-visible {
+    border-color: rgba(11, 11, 11, .32); outline: none;
+    box-shadow: 0 16px 40px -18px rgba(11, 11, 11, .22);
+    transform: translateY(-2px);
   }
-  .dcard:hover .dcard__media--logo img { transform: scale(1.03); }
-  /* a set of print pieces: contained thumbnails that open a paged lightbox */
-  .dcard__media--set {
-    aspect-ratio: auto;
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: clamp(.55rem, 1.6vw, 1.1rem);
-    align-items: stretch;
+  .dfolder__ico { width: clamp(50px, 12vw, 66px); margin-bottom: .35rem; color: var(--ink); }
+  .dfolder__ico svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .dfolder__flap {
+    transform-origin: 50% 16px;
+    transition: transform .32s cubic-bezier(.34, 1.4, .5, 1);
   }
-  .dset__item {
+  .dfolder:hover .dfolder__flap,
+  .dfolder:focus-visible .dfolder__flap { transform: perspective(140px) rotateX(-34deg); }
+  .dfolder__label {
+    font-family: var(--font); font-weight: 700; letter-spacing: -0.02em;
+    font-size: clamp(1.05rem, .95rem + .6vw, 1.3rem); line-height: 1.15;
+    text-wrap: balance;
+  }
+  .dfolder__count { color: var(--mute); font-size: .84rem; letter-spacing: .01em; }
+  @media (prefers-reduced-motion: reduce) {
+    .dfolder, .dfolder__flap { transition: none; }
+    .dfolder:hover { transform: none; }
+  }
+
+  /* the pop-up sheet with the folder's pieces */
+  .dsheet {
+    position: fixed; inset: 0; z-index: 150;
+    background: var(--paper);
+    display: grid; place-items: start center;
+    padding: clamp(1.5rem, 5vw, 4rem) clamp(1rem, 5vw, 4rem);
+    overflow-y: auto; animation: fade .2s ease both;
+  }
+  .dsheet[hidden] { display: none; }
+  .dsheet__panel {
+    width: 100%; max-width: 1080px; position: relative;
+    animation: dsheet-pop .34s cubic-bezier(.2, 1.1, .3, 1) both;
+  }
+  @keyframes dsheet-pop {
+    from { opacity: 0; transform: translateY(14px) scale(.97); }
+    to   { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .dsheet__panel { animation: fade .2s ease both; } }
+  .dsheet__close {
+    position: absolute; top: -.2rem; right: 0;
+    appearance: none; background: none; border: 0; padding: .4rem; cursor: pointer;
+    color: var(--ink); transition: transform .18s ease;
+  }
+  .dsheet__close:hover { transform: scale(1.12); }
+  .dsheet__close svg { width: 22px; height: 22px; display: block; stroke: currentColor; stroke-width: 1.6; fill: none; }
+  .dsheet__head { max-width: 46ch; margin: 0 0 clamp(1.75rem, 4vw, 2.75rem); padding-right: 3rem; }
+  .dsheet__title {
+    font-family: var(--font); font-weight: 700; letter-spacing: -0.03em;
+    font-size: clamp(1.6rem, 1rem + 2.4vw, 2.5rem); line-height: 1.05; margin: 0;
+    text-wrap: balance;
+  }
+  .dsheet__sub { color: var(--mute); font-size: .95rem; margin: .5rem 0 0; letter-spacing: .01em; }
+  .dsheet__sub:empty { display: none; }
+  .dsheet__desc { margin: 1.1rem 0 0; color: var(--ink-soft); font-size: .98rem; line-height: 1.5; }
+  .dsheet__desc:empty { display: none; }
+  .dsheet__grid {
+    display: grid; gap: clamp(1rem, 3vw, 2rem);
+    grid-template-columns: repeat(auto-fill, minmax(190px, 240px));
+    justify-content: start; align-items: start;
+  }
+  .dsheet__item {
     appearance: none; -webkit-appearance: none; border: 0; margin: 0; padding: 0;
     background: var(--paper-2); cursor: pointer; overflow: hidden;
     aspect-ratio: 1 / 1.414;
     display: grid; place-items: center;
     transition: transform .3s cubic-bezier(.22, 1, .3, 1), box-shadow .3s ease;
   }
-  .dset__item img {
+  .dsheet__item[data-fit="contain"] { aspect-ratio: 1 / 1; }
+  .dsheet__item[data-fit="contain"] img { padding: 12%; }
+  .dsheet__item img {
     max-width: 100%; max-height: 100%;
     min-width: 0; min-height: 0;
     width: auto; height: auto;
     object-fit: contain; display: block;
   }
-  .dset__item--logo img { padding: 14%; }
-  .dcard:hover .dset__item { box-shadow: 0 14px 32px -16px rgba(11, 11, 11, .2); }
-  .dset__item:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -12px rgba(11, 11, 11, .26); }
-  @media (hover: none) {
-    .dset__item:hover, .dcard:hover .dset__item { transform: none; box-shadow: none; }
-  }
-  .dcard__title {
-    font-family: var(--font); font-weight: 700; letter-spacing: -0.03em;
-    font-size: clamp(1.5rem, 1rem + 2.2vw, 2.4rem); line-height: 1.05; margin: 0;
-    text-wrap: balance;
-  }
-  .dcard__sub { color: var(--mute); font-size: .95rem; margin: .5rem 0 0; letter-spacing: .01em; }
-  .dcard__desc {
-    margin: 1.1rem 0 0; color: var(--ink-soft);
-    font-size: .98rem; line-height: 1.5; max-width: 42ch;
-  }
-  @media (min-width: 900px) {
-    .dcard { grid-template-columns: 1.4fr .6fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
-  }
+  .dsheet__item:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -12px rgba(11, 11, 11, .26); }
+  @media (hover: none) { .dsheet__item:hover { transform: none; box-shadow: none; } }
 
   /* --- Lightbox --- */
   .lightbox {
@@ -732,38 +761,46 @@
 
       <!-- DESIGN -->
       <div class="wpanel" data-panel="design">
-        <div class="dcards">
-          <article class="dcard">
-            <button class="dcard__media dcard__media--logo" type="button"
-              aria-label="Grösser ansehen: 01 Logo Rettungsdienst Emmental-Oberaargau">
-              <img src="design/logo-rettungsdienst.webp" alt="Emblem Rettungsdienst Emmental-Oberaargau" loading="lazy">
-            </button>
-            <div>
-              <h3 class="dcard__title">01 Rettungsdienst Emmental&#8209;Oberaargau</h3>
-              <p class="dcard__sub">Logo · Emblem · Vektorgrafik</p>
-              <p class="dcard__desc">Crew-Abzeichen für den Rettungsdienst der Region Emmental-Oberaargau. Der Star of Life bildet das Zentrum, umringt vom Einsatzgebiet als Kartensilhouette, dem Berner Wappen, regionalen Wahrzeichen und einer durchlaufenden EKG-Linie.</p>
-            </div>
-          </article>
+        <div class="dfolders">
+          <button class="dfolder" type="button" aria-haspopup="dialog" data-folder="fld-rettungsdienst">
+            <span class="dfolder__ico" aria-hidden="true">
+              <svg viewBox="0 0 48 38" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+                <path d="M2 8.5C2 6 4 4 6.5 4H17l4.5 5H41.5C44 9 46 11 46 13.5V31c0 2.5-2 4.5-4.5 4.5h-35C4 35.5 2 33.5 2 31V8.5Z"/>
+                <path class="dfolder__flap" d="M2.4 16h43.2l-3.3 15.8c-.4 2.1-2.3 3.7-4.4 3.7H10.1c-2.1 0-4-1.6-4.4-3.7L2.4 16Z" fill="var(--paper)"/>
+              </svg>
+            </span>
+            <span class="dfolder__label">01 Rettungsdienst Emmental&#8209;Oberaargau</span>
+            <span class="dfolder__count">Logo · 1 Element</span>
+          </button>
 
-          <article class="dcard">
-            <div class="dcard__media dcard__media--set">
-              <button class="dset__item" type="button" aria-label="Grösser ansehen: Flyer JetSetGo, Variante A">
-                <img src="design/printprodukt-flyer-a.webp" alt="Eventflyer JetSetGo – Variante mit Strandmotiv" loading="lazy">
-              </button>
-              <button class="dset__item" type="button" aria-label="Grösser ansehen: Flyer JetSetGo, Variante B">
-                <img src="design/printprodukt-flyer-b.webp" alt="Eventflyer JetSetGo – Variante mit Luftaufnahme" loading="lazy">
-              </button>
-              <button class="dset__item dset__item--logo" type="button" aria-label="Grösser ansehen: Logo JetSetGo">
-                <img src="design/printprodukt-logo-jetsetgo.webp" alt="Bildmarke JetSetGo" loading="lazy">
-              </button>
-            </div>
-            <div>
-              <h3 class="dcard__title">02 Printprodukte JetSetGo</h3>
-              <p class="dcard__sub">Flyer · Logo · ÜK-Projekt</p>
-              <p class="dcard__desc">Fiktives Reisebüro JetSetGo: Im überbetrieblichen Kurs entstanden die Bildmarke und zwei Gestaltungsvarianten für den Event-Flyer «Jetzt Traumreise planen». Beide arbeiten mit einem grossflächigen Seychellen-Bild, dem dunkelblauen Infoblock und dem runden «Gratis Event»-Störer – einmal mit seitlichem Strandmotiv, einmal mit einer Luftaufnahme.</p>
-            </div>
-          </article>
+          <button class="dfolder" type="button" aria-haspopup="dialog" data-folder="fld-printprodukte">
+            <span class="dfolder__ico" aria-hidden="true">
+              <svg viewBox="0 0 48 38" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+                <path d="M2 8.5C2 6 4 4 6.5 4H17l4.5 5H41.5C44 9 46 11 46 13.5V31c0 2.5-2 4.5-4.5 4.5h-35C4 35.5 2 33.5 2 31V8.5Z"/>
+                <path class="dfolder__flap" d="M2.4 16h43.2l-3.3 15.8c-.4 2.1-2.3 3.7-4.4 3.7H10.1c-2.1 0-4-1.6-4.4-3.7L2.4 16Z" fill="var(--paper)"/>
+              </svg>
+            </span>
+            <span class="dfolder__label">02 Printprodukte JetSetGo</span>
+            <span class="dfolder__count">Flyer &amp; Logo · 3 Elemente</span>
+          </button>
         </div>
+
+        <template id="fld-rettungsdienst">
+          <div data-title="01 Rettungsdienst Emmental-Oberaargau"
+               data-sub="Logo · Emblem · Vektorgrafik"
+               data-desc="Crew-Abzeichen für den Rettungsdienst der Region Emmental-Oberaargau. Der Star of Life bildet das Zentrum, umringt vom Einsatzgebiet als Kartensilhouette, dem Berner Wappen, regionalen Wahrzeichen und einer durchlaufenden EKG-Linie.">
+            <img src="design/logo-rettungsdienst.webp" alt="Emblem Rettungsdienst Emmental-Oberaargau" data-fit="contain">
+          </div>
+        </template>
+        <template id="fld-printprodukte">
+          <div data-title="02 Printprodukte JetSetGo"
+               data-sub="Flyer · Logo · ÜK-Projekt"
+               data-desc="Fiktives Reisebüro JetSetGo: Im überbetrieblichen Kurs entstanden die Bildmarke und zwei Gestaltungsvarianten für den Event-Flyer «Jetzt Traumreise planen». Beide arbeiten mit einem grossflächigen Seychellen-Bild, dem dunkelblauen Infoblock und dem runden «Gratis Event»-Störer – einmal mit seitlichem Strandmotiv, einmal mit einer Luftaufnahme.">
+            <img src="design/printprodukt-flyer-a.webp" alt="Eventflyer JetSetGo – Variante mit Strandmotiv">
+            <img src="design/printprodukt-flyer-b.webp" alt="Eventflyer JetSetGo – Variante mit Luftaufnahme">
+            <img src="design/printprodukt-logo-jetsetgo.webp" alt="Bildmarke JetSetGo" data-fit="contain">
+          </div>
+        </template>
       </div>
     </div>
     <footer class="foot">
@@ -820,6 +857,20 @@
   </button>
 </div>
 
+<div class="dsheet" id="dsheet" hidden>
+  <div class="dsheet__panel" role="dialog" aria-modal="true" aria-labelledby="dsheetTitle">
+    <button class="dsheet__close" id="dsheetClose" type="button" aria-label="Ordner schliessen">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>
+    </button>
+    <header class="dsheet__head">
+      <h3 class="dsheet__title" id="dsheetTitle"></h3>
+      <p class="dsheet__sub"></p>
+      <p class="dsheet__desc"></p>
+    </header>
+    <div class="dsheet__grid" id="dsheetGrid"></div>
+  </div>
+</div>
+
 <script>
   (function () {
     var sections = {
@@ -844,6 +895,8 @@
     }
 
     function render() {
+      if (typeof closeFolder === "function") closeFolder();
+      if (typeof closeLb === "function") closeLb();
       var key = current();
       var route = routeMap[key];
       Object.keys(sections).forEach(function (name) {
@@ -1231,6 +1284,7 @@
     var lbPrev = document.getElementById("lightboxPrev");
     var lbNext = document.getElementById("lightboxNext");
     var lbList = [], lbPos = 0, lbMode = null, lbReturn = null;
+    var dsheet = document.getElementById("dsheet");
     var heroSrc = (function () {
       var s = document.querySelector(".home__clip video source");
       return s ? s.getAttribute("src") : "";
@@ -1265,7 +1319,7 @@
       lb.hidden = true;
       lbStage.innerHTML = "";
       lbMode = null;
-      document.documentElement.style.overflow = "";
+      document.documentElement.style.overflow = (dsheet && !dsheet.hidden) ? "hidden" : "";
       if (lbReturn && lbReturn.focus) lbReturn.focus();
     }
     function openPhotoFrom(el, pool) {
@@ -1337,35 +1391,71 @@
     lbNext.addEventListener("click", function () { lbStep(1); });
     lb.addEventListener("click", function (e) { if (e.target === lb) closeLb(); });
     document.addEventListener("keydown", function (e) {
-      if (lb.hidden) return;
-      if (e.key === "Escape") closeLb();
-      else if (e.key === "ArrowLeft") lbStep(-1);
-      else if (e.key === "ArrowRight") lbStep(1);
+      if (!lb.hidden) {
+        if (e.key === "Escape") closeLb();
+        else if (e.key === "ArrowLeft") lbStep(-1);
+        else if (e.key === "ArrowRight") lbStep(1);
+        return;
+      }
+      if (e.key === "Escape" && dsheet && !dsheet.hidden) closeFolder();
     });
     galItems.forEach(function (it) {
       it.addEventListener("click", function () { openPhotoFrom(it, galItems); });
     });
-    (work ? [].slice.call(work.querySelectorAll(".dcard__media")) : []).forEach(function (m) {
-      var setItems = [].slice.call(m.querySelectorAll(".dset__item"));
-      if (setItems.length) {
-        var urls = setItems.map(function (b) {
-          var i = b.querySelector("img");
-          return i ? (i.getAttribute("data-full") || i.src) : "ph";
+    /* ---- DESIGN folders: click a folder → its pieces pop up in a sheet ---- */
+    var dsheetGrid = document.getElementById("dsheetGrid");
+    var dsheetClose = document.getElementById("dsheetClose");
+    var dsheetTitle = document.getElementById("dsheetTitle");
+    var dsheetSub = dsheet ? dsheet.querySelector(".dsheet__sub") : null;
+    var dsheetDesc = dsheet ? dsheet.querySelector(".dsheet__desc") : null;
+    var dsheetReturn = null;
+
+    function openFolder(id) {
+      var tpl = document.getElementById(id);
+      if (!tpl || !dsheet || !tpl.content) return;
+      var data = tpl.content.firstElementChild;
+      if (!data) return;
+      var srcImgs = [].slice.call(data.querySelectorAll("img"));
+      var urls = srcImgs.map(function (im) { return im.getAttribute("src"); });
+      dsheetTitle.textContent = data.getAttribute("data-title") || "";
+      if (dsheetSub) dsheetSub.textContent = data.getAttribute("data-sub") || "";
+      if (dsheetDesc) dsheetDesc.textContent = data.getAttribute("data-desc") || "";
+      dsheetGrid.innerHTML = "";
+      srcImgs.forEach(function (im, i) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "dsheet__item";
+        var fit = im.getAttribute("data-fit");
+        if (fit) b.setAttribute("data-fit", fit);
+        b.setAttribute("aria-label", "Grösser ansehen: " + (im.getAttribute("alt") || ("Bild " + (i + 1))));
+        var c = document.createElement("img");
+        c.src = im.getAttribute("src");
+        c.alt = im.getAttribute("alt") || "";
+        c.loading = "lazy";
+        b.appendChild(c);
+        b.addEventListener("click", function () {
+          lbList = urls; lbPos = i; lbMode = "photo";
+          lbRenderPhoto(); openLb();
         });
-        setItems.forEach(function (b, i) {
-          b.addEventListener("click", function (e) {
-            e.stopPropagation();
-            lbList = urls; lbPos = i; lbMode = "photo";
-            lbRenderPhoto(); openLb();
-          });
-        });
-        return;
-      }
-      m.addEventListener("click", function () {
-        var img = m.querySelector("img");
-        openSingle(img ? (img.getAttribute("data-full") || img.src) : m.querySelector(".ph").className);
+        dsheetGrid.appendChild(b);
       });
+      dsheetReturn = document.activeElement;
+      dsheet.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      dsheetClose.focus();
+    }
+    function closeFolder() {
+      if (!dsheet || dsheet.hidden) return;
+      dsheet.hidden = true;
+      dsheetGrid.innerHTML = "";
+      if (lb.hidden) document.documentElement.style.overflow = "";
+      if (dsheetReturn && dsheetReturn.focus) dsheetReturn.focus();
+    }
+    (work ? [].slice.call(work.querySelectorAll(".dfolder")) : []).forEach(function (f) {
+      f.addEventListener("click", function () { openFolder(f.getAttribute("data-folder")); });
     });
+    if (dsheetClose) dsheetClose.addEventListener("click", closeFolder);
+    if (dsheet) dsheet.addEventListener("click", function (e) { if (e.target === dsheet) closeFolder(); });
 
     /* ---- relayout hooks ---- */
     function onArbeitenShown() {
